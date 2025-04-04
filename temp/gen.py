@@ -75,11 +75,11 @@ unique_chain_len = list(set(chain_len)) #Get the unique chain lengths
 print(f"Found {len(unique_chain_len)} unique chains in the PDB file.")
 for i in range(len(unique_chain_len)):
     print(f"Unique chain {i+1} length: {chain_len[i]} atoms")
-print(chain_atomID)
 
 letter = 'ABCDEFGHIJKLMNOPQRSTUVWYZ'
 
 with open(output_File, 'w') as file:
+    print(f"Writing to {output_File}...")
     counter = 0
     for line in pdb:
         if line.startswith("ATOM"):
