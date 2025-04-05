@@ -96,4 +96,3 @@ with open(output_File, 'w') as file:
 
         else:
             file.write(line + '\n')
-
