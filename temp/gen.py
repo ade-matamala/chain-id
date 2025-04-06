@@ -2,20 +2,58 @@ import sys
 
 # This script generates a PDB file with specific chain IDs based on the input specifications.
 
-if len(sys.argv) != 4: #Check if the correct number of arguments is provided
+# Define a function to display the help message
+help_message = """
+    This script generates a PDB file with specific chain IDs based on the input specifications.
+
+    Usage:
+        python gen.py -i <input.pdb> -o <output.pdb> -l <ligand_file.txt>
+
+    Arguments:
+        <input.pdb>      : The input PDB file.
+        <output.pdb>     : The output PDB file with updated chain IDs. 
+        <ligand_file.txt> : A text file containing ligand names (optional).
+
+    Options:
+        -h, --help       : Display this help message and exit.
+    """
+correct_usage = "Correct usage: python gen.py -i <input.pdb> -o <output.pdb> -l <ligand_file.txt>"
+# Check for help flag
+if '-h' in sys.argv or '--help' in sys.argv:
+    print(help_message)
+    sys.exit(0)
+elif len(sys.argv) > 7 or len(sys.argv) < 5: #Check if the correct number of arguments is provided
     print("Incorrect number of arguments!")
-    print("Correct usage: python gen.py <specs_file.txt> <input.pdb> <output.pdb>")
+    print(correct_usage)
     sys.exit(1)
 
-# Read files
-ligands_File = sys.argv[1] #Ligand specifications file
-input_File = sys.argv[2] #Input PDB file
-output_File = sys.argv[3] #Output PDB file
-
-# Read the ligand specifications file
-with open(ligands_File, 'r') as file:
-    ligands = file.read().splitlines()
-file.close()
+# Read files from command line arguments
+if '-i' in sys.argv: #Check if the input file flag is present
+    input_index = sys.argv.index('-i') + 1
+    if input_index < len(sys.argv):
+        input_File = sys.argv[input_index]
+    else:
+        print("Input file not provided!")
+        print(correct_usage)
+        sys.exit(1)
+if '-o' in sys.argv: #Check if the output file flag is present
+    output_index = sys.argv.index('-o') + 1
+    if output_index < len(sys.argv):
+        output_File = sys.argv[output_index]
+    else:
+        print("Output file not provided!")
+        print(correct_usage)
+        sys.exit(1)
+if '-l' in sys.argv: #Check if the ligand file flag is present
+    ligands_index = sys.argv.index('-l') + 1
+    if ligands_index < len(sys.argv): #Check if the ligand file is provided
+        ligands_File = sys.argv[ligands_index]
+        with open(ligands_File, 'r') as file: #Read the ligand file
+            ligands = file.read().splitlines()
+        file.close()
+else: 
+    print("Ligand file not provided. Defaulting to no ligands.")
+    ligands = ""
 
 ligands_number = len(ligands) #Extract the ligand number from the first line of the specifications
 if ligands_number > 0: #Check if ligands are present
@@ -23,8 +61,8 @@ if ligands_number > 0: #Check if ligands are present
     for i in range(ligands_number):
         print(f"Found ligand number {i+1}: {ligands[i]}")
 else: #If no ligands are present, set the variable to False
-    ligands = False
-    print("Found no ligands in the specifications file.")
+    ligands = ""
+    print("Found no ligands.")
 
 # Read the input PDB file
 with open(input_File, 'r') as file:
@@ -35,14 +73,12 @@ pdb_split = []
 for line in pdb:
     if line.startswith("ATOM"):
         pdb_split.append(line.split())
-#print(pdb_split[0])
 
 lig_ID = []
 for line in pdb_split:
     for lig in ligands:
         if lig in line[3]:
             lig_ID.append(line[4])
-            #print(f"Found ligand {lig} in {line} line of the PDB file.")
 lig_ID = list(set(lig_ID)) #Get the unique ligand IDs
 
 atom_type = []
